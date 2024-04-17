@@ -1,21 +1,27 @@
 import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 import AddEmployeeForm from "../components/AddEmployeeForm";
+import EditEmployeeForm from "../components/EditEmployeeForm";
+import DeleteEmployeeForm from "../components/DeleteEmployeeForm";
 
 const AdminDashboard = () => {
   const { userInfo } = useSelector((state) => state.auth);
   const [employees, setEmployees] = useState([]);
   const [sortBy, setSortBy] = useState("");
-  const [isAddEmployeeClicked, setIsAddEmployeeClicked] = useState(true);
+  const [isAddEmployeeClicked, setIsAddEmployeeClicked] = useState(false);
+  const [isEditEmployeeClicked, setIsEditEmployeeClicked] = useState(false);
+  const [singleEmployee, setSingleEmployee] = useState(null);
+  const [isDeleteModelClicked, setIsDeleteModelClicked] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const fetchAllEmployees = async () => {
     try {
       const response = await axios.get(`/api/admin/getEmployees`, {
         withCredentials: true,
         params: {
-          sortBy, // Send sortBy parameter to backend
+          sortBy,
         },
       });
       setEmployees(response.data.data);
@@ -27,12 +33,12 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     fetchAllEmployees();
-  }, [sortBy]); // Refetch employees when sortBy changes
+  }, [sortBy]);
 
-  
   const handleSortChange = (event) => {
-    setSortBy(event.target.checked ? event.target.name + ":-1" : ""); // Set sortBy based on checkbox state
+    setSortBy(event.target.checked ? event.target.name + ":-1" : "");
   };
+
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     const day = date.getDate().toString().padStart(2, "0");
@@ -41,21 +47,46 @@ const AdminDashboard = () => {
     return `${day}-${month}-${year}`;
   };
 
+  const addEmployeeHandler = (e) => {
+    e.preventDefault();
+    setIsAddEmployeeClicked(true);
+  };
 
-  const addEmployeeHandler=(e)=>{
-    e.preventDefault()
-    setIsAddEmployeeClicked(true)
-  }
+  const editHandler = (employee) => {
+    console.log("Edit clicked");
+    console.log(employee);
+    setIsEditEmployeeClicked(true);
+    setSingleEmployee(employee);
+  };
 
+  const deleteHandler = (employee) => {
+    setIsDeleteModelClicked(true);
+    setSingleEmployee(employee);
+  };
 
+  const handleSearchChange = (event) => {
+    setSearchQuery(event.target.value);
+  };
+
+  const filteredEmployees = employees.filter(
+    (employee) =>
+      employee.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      employee.email.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div className="mx-auto px-10">
       <h1 className="text-3xl font-medium">Welcome to Admin Panel</h1>
-      <h1 className="text-center">Employee List</h1>
-      
+      <h1 className="text-center text-xl">Employee List</h1>
+
       <div className="flex items-center gap-5">
-      <input type="text" placeholder="search by names" className="outline-none border-2 border-black px-3 py-2"/>
+        <input
+          type="text"
+          placeholder="Search by name or email"
+          className="outline-none border-2 border-black px-3 py-2"
+          value={searchQuery}
+          onChange={handleSearchChange}
+        />
         <div className="flex items-center gap-2">
           <label htmlFor="name">Sort by Name</label>
           <input
@@ -88,12 +119,15 @@ const AdminDashboard = () => {
 
       <div className="relative">
         <div className="absolute flex items-end justify-center right-14 -top-1 py-2 gap-5 ">
-          <h1>Total Count: {employees.length}</h1>
-          <button onClick={addEmployeeHandler} className="bg-green-500 py-1 rounded-md px-3 hover:scale-95 transition-transform">
+          <h1>Total Count: {filteredEmployees.length}</h1>
+          <button
+            onClick={addEmployeeHandler}
+            className="bg-green-500 py-1 rounded-md px-3 hover:scale-95 transition-transform"
+          >
             Create Employee
           </button>
         </div>
-        {employees.length === 0 ? (
+        {filteredEmployees.length === 0 ? (
           <p>No employees found</p>
         ) : (
           <div className="border-2 p-10">
@@ -113,7 +147,7 @@ const AdminDashboard = () => {
                 </tr>
               </thead>
               <tbody>
-                {employees.map((employee) => (
+                {filteredEmployees.map((employee) => (
                   <tr key={employee._id}>
                     <td className="border px-4 py-2">{employee._id}</td>
                     <td className="border px-4 py-2">
@@ -133,8 +167,18 @@ const AdminDashboard = () => {
                       {formatDate(employee.createdAt)}
                     </td>
                     <td className="border-t px-4 py-3">
-                      <button className="bg-[#eeee] p-1 px-3 mr-3">Edit</button>
-                      <button className="bg-red-400 p-1 px-2">Delete</button>
+                      <button
+                        className="bg-[#eeee] p-1 px-3 mr-3"
+                        onClick={() => editHandler(employee)}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        className="bg-red-400 p-1 px-2"
+                        onClick={() => deleteHandler(employee)}
+                      >
+                        Delete
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -143,9 +187,23 @@ const AdminDashboard = () => {
           </div>
         )}
       </div>
-        {
-          isAddEmployeeClicked && <AddEmployeeForm setIsAddEmployeeClicked={setIsAddEmployeeClicked} />
-        }
+      {isAddEmployeeClicked && (
+        <AddEmployeeForm setIsAddEmployeeClicked={setIsAddEmployeeClicked} />
+      )}
+      {isEditEmployeeClicked && (
+        <EditEmployeeForm
+          setIsEditEmployeeClicked={setIsEditEmployeeClicked}
+          singleEmployee={singleEmployee}
+          setSingleEmployee={setSingleEmployee}
+        />
+      )}
+      {isDeleteModelClicked && (
+        <DeleteEmployeeForm
+          setIsDeleteModelClicked={setIsDeleteModelClicked}
+          singleEmployee={singleEmployee}
+          setSingleEmployee={setSingleEmployee}
+        />
+      )}
 
       <Toaster />
     </div>

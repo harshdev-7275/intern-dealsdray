@@ -1,36 +1,33 @@
-import express from "express"
-import dotenv from "dotenv"
+import express from "express";
+import dotenv from "dotenv";
 dotenv.config();
 import cookieParser from "cookie-parser";
 import connectDB from "./config/db.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import { errorHandler, notFound } from "./middlewares/errorMiddleware.js";
-import multer from "multer"
-
-
+import multer from "multer";
 
 const port = process.env.PORT || 5000;
 const storage = multer.diskStorage({
-    destination: function(req, file, callback) {
-      callback(null, '/images');
-    },
-    filename: function (req, file, callback) {
-      callback(null, file.fieldname);
-    }
-  });
+  destination: function (req, file, callback) {
+    callback(null, "/images");
+  },
+  filename: function (req, file, callback) {
+    callback(null, file.fieldname);
+  },
+});
 
-connectDB()
+connectDB();
 
-const app = express()
-app.use(express.json())
-app.use(express.urlencoded({ extended: true }))
+const app = express();
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-app.use(cookieParser())
+app.use(cookieParser());
 
-app.use("/api/admin", adminRoutes)
-
+app.use("/api/admin", adminRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
 
-app.listen(port, () => console.log(`server is running on ${port}`))
+app.listen(port, () => console.log(`server is running on ${port}`));
