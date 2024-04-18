@@ -2,18 +2,22 @@ import React from 'react'
 import { useSelector } from 'react-redux'
 import { useLogoutMutation } from '../slices/userApiSlice'
 import toast,{Toaster} from 'react-hot-toast'
+import { useNavigate } from 'react-router-dom'
 
 const Navbar = () => {
   const{userInfo} = useSelector((state) => state.auth)
   const [logout] = useLogoutMutation();
+  const navigate = useNavigate()
  
   const logoutHandler = async(e) => {
     try {
       const res = await logout().unwrap();
       console.log(res);
       localStorage.removeItem("userInfo");
+
       
       toast.success("Logged out successfully");
+      
     } catch (error) {
       console.log(error);
       toast.error(error?.data?.message || error.error);

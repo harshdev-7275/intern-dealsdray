@@ -6,6 +6,9 @@ import connectDB from "./config/db.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import { errorHandler, notFound } from "./middlewares/errorMiddleware.js";
 import multer from "multer";
+import cors from "cors";
+
+// some legacy browsers (IE11, various SmartTVs) choke on 204
 
 const port = process.env.PORT || 5000;
 const storage = multer.diskStorage({
@@ -22,7 +25,14 @@ connectDB();
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
+app.use(
+  cors({
+    origin: "*",
+    headers: ["Content-Type"],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  })
+);
 app.use(cookieParser());
 
 app.use("/api/admin", adminRoutes);

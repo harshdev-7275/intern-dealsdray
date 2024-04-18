@@ -154,7 +154,7 @@ const AdminDashboard = () => {
                       <img
                         src={employee.image}
                         alt=""
-                        className="w-[70px] object-cover rounded-full"
+                        className="w-[70px] object-fill rounded-full"
                       />
                     </td>
                     <td className="border px-4 py-2">{employee.name}</td>

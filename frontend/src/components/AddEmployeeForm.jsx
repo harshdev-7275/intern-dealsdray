@@ -202,6 +202,18 @@ const AddEmployeeForm = ({setIsAddEmployeeClicked}) => {
                   />
                 </label>
               </div>
+              <div>
+                <label htmlFor="BSC" className="text-lg">
+                  BSC
+                  <input
+                    type="radio"
+                    id="BSC"
+                    value="BSC"
+                    checked={course === "BSC"}
+                    onChange={(e) => setCourse(e.target.value)}
+                  />
+                </label>
+              </div>
             </div>
           </div>
 
